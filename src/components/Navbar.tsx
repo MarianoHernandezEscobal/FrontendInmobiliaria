@@ -123,7 +123,7 @@ export default function Navbar() {
               }
               setShowUserMenu((prev) => !prev) // Abre/cierra el dropdown si está logueado
             }}
-            className={`font-semibold text-white flex items-center gap-2 ${
+            className={`font-semibold text-white flex items-center gap-2 cursor-pointer hover:underline${
               useSolidNav ? 'text-sm' : 'text-base'
             }`}
           >
@@ -155,7 +155,7 @@ export default function Navbar() {
                     router.push('/login');
                     setShowUserMenu(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 cursor-pointer text-sm hover:bg-gray-100"
                 >
                   Iniciar sesión
                 </button>
