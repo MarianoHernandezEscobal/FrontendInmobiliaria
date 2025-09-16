@@ -96,8 +96,9 @@ export default function SearchPageContent() {
               <PropertyCard key={property.id} property={property} />
             ))
           ) : (
-            <p>No se encontraron propiedades con los filtros aplicados.</p>
-          )}
+          <div className="col-span-full text-center py-12">
+            <p className="text-muted-foreground text-lg">No se encontraron propiedades que coincidan con tu búsqueda</p>
+          </div>          )}
         </section>
       </div>
     </div>

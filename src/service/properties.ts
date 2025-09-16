@@ -26,7 +26,6 @@ export async function GetPropertyById(id: number): Promise<any> {
 
 export async function GetAllProperties(): Promise<Property[]> {
     const url = `${BASE_URL}/properties/findAll`;
-
     try {
         const response = await axios.get(url, {
             headers: {

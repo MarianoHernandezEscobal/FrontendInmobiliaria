@@ -86,7 +86,7 @@ export default function AgentHome() {
             </div>
 
             <Link
-              href="/contact"
+              href="/contacto"
               className="text-accent hover:text-primary text-2xl"
             >
               <FaArrowRight />

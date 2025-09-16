@@ -96,7 +96,7 @@ export default function LoginPage() {
         </form>
         <p className="mt-4 text-sm text-center text-gray-600">
           ¿No tienes una cuenta?{" "}
-          <a href="/register" className="text-blue-500 hover:underline">
+          <a href="/registro" className="text-blue-500 hover:underline">
             Regístrate
           </a>
         </p>

@@ -1,8 +1,8 @@
 "use client";
 
 import { UserUpdateRequestDto } from "@/service/dto/user-update.request.dto";
-import { getUsers, loginUser, updateUser } from "@/service/user";
-import { User } from "@/types/user";
+import { getUsers, loginUser, registerUser, updateUser } from "@/service/user";
+import { RegisterUser, User } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -14,6 +14,8 @@ interface UserContextProps {
   loginUser: (email: string, password: string) => void;
   fetchUserProfile: () => Promise<void>;
   updateUserProfile: (formData: UserUpdateRequestDto) => Promise<void>;
+  registerUser: (user: RegisterUser) => void;
+
 }
 
 const UserContext = createContext<UserContextProps | undefined>(undefined);
@@ -43,6 +45,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const handlerLogin = async (email: string, password: string) => {
     try {
       const response = await loginUser(email, password);
+      sessionStorage.setItem("token", response.token);
+      sessionStorage.setItem("user", JSON.stringify(response.user));
+      setHasSession(true);
+      setToken(response.token);
+      setUser(response.user);
+    } catch (error) {
+      console.error("Error during login:", error);
+      setHasSession(false);
+      setUser(null);
+      setToken(null);
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      throw error;
+    }
+  };
+
+  const handlerRegister = async (user: RegisterUser) => {
+    try {
+      const response = await registerUser(user);
       sessionStorage.setItem("token", response.token);
       sessionStorage.setItem("user", JSON.stringify(response.user));
       setHasSession(true);
@@ -105,6 +126,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         logoutUser: handleLogout,
         fetchUserProfile,
         updateUserProfile,
+        registerUser: handlerRegister
       }}
     >
       {children}

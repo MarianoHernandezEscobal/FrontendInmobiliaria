@@ -5,6 +5,7 @@ import axios from "axios";
 import { AuthenticationResponseDto } from "./dto/authentication.response.dto";
 import { UserUpdateRequestDto } from "./dto/user-update.request.dto";
 import { ChangePasswordRequestDto } from "./dto/change-password.request.dto";
+import { RegisterUser } from "@/types/user";
 
 export const loginUser = async (
   email: string,
@@ -67,3 +68,15 @@ export const changePassword = async (
   );
   return res.data;
 };
+
+export const registerUser = async (
+  user: RegisterUser
+) => {
+  const res = await axios.post<AuthenticationResponseDto>(
+    `${BASE_URL}/user/create`,
+    {
+      user
+    }
+  );
+  return res.data;
+}

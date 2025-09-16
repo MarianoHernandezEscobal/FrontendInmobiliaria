@@ -6,3 +6,11 @@ export interface User {
     admin: boolean;
     createdAt: string;
 }
+
+export interface RegisterUser{
+    password: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+}
