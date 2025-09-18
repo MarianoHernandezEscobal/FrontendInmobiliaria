@@ -1,14 +1,9 @@
-"use client";
+"use client"
 
-import { AgentProps } from "@/types/agents";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  FaBuilding,
-  FaWhatsapp,
-  FaEnvelope,
-  FaArrowRight,
-} from "react-icons/fa";
+import type { AgentProps } from "@/types/agents"
+import Image from "next/image"
+import Link from "next/link"
+import { FaBuilding, FaWhatsapp, FaEnvelope, FaArrowRight } from "react-icons/fa"
 
 const agentsData: AgentProps[] = [
   {
@@ -25,7 +20,7 @@ const agentsData: AgentProps[] = [
     email: "gerardo@inmobiliaricostaazul.com",
     imageUrl: "/team/Gerardo.jpeg",
   },
-];
+]
 
 export default function AgentHome() {
   return (
@@ -46,11 +41,10 @@ export default function AgentHome() {
           >
             <div className="w-24 h-24 rounded-full overflow-hidden bg-muted flex-shrink-0 relative">
               <Image
-                src={agent.imageUrl}
+                src={agent.imageUrl || "/placeholder.svg"}
                 alt={agent.name}
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-
                 className="object-cover"
               />
             </div>
@@ -58,42 +52,30 @@ export default function AgentHome() {
             <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1">
               <p className="text-muted-foreground mb-1 flex items-center">
                 <FaBuilding className="mr-2 text-accent" />
-                <a
-                  href={`tel:${agent.oficina}`}
-                  className="hover:text-primary ml-1"
-                >
+                <a href={`tel:${agent.oficina}`} className="hover:text-primary ml-1">
                   {agent.oficina}
                 </a>
               </p>
               <p className="text-muted-foreground mb-1 flex items-center">
                 <FaWhatsapp className="mr-2 text-accent" />
-                <a
-                  href={`tel:${agent.whatsapp}`}
-                  className="hover:text-primary ml-1"
-                >
+                <a href={`tel:${agent.whatsapp}`} className="hover:text-primary ml-1">
                   {agent.whatsapp}
                 </a>
               </p>
-              <p className="text-muted-foreground mb-1 flex items-center">
-                <FaEnvelope className="mr-2 text-accent" />
-                <a
-                  href={`mailto:${agent.email}`}
-                  className="hover:text-primary ml-1"
-                >
+              <p className="text-muted-foreground mb-1 flex items-center min-w-0 w-full">
+                <FaEnvelope className="mr-2 text-accent h-4 w-4 flex-shrink-0" />
+                <a href={`mailto:${agent.email}`} className="hover:text-primary ml-1 break-all sm:break-normal min-w-0">
                   {agent.email}
                 </a>
               </p>
             </div>
 
-            <Link
-              href="/contacto"
-              className="text-accent hover:text-primary text-2xl"
-            >
+            <Link href="/contacto" className="text-accent hover:text-primary text-2xl">
               <FaArrowRight />
             </Link>
           </article>
         ))}
       </div>
     </div>
-  );
+  )
 }

@@ -54,26 +54,26 @@ export default function Home() {
                 {
                   id: '1',
                   title: 'Ven a conocer nuestra fauna',
-                  url: '/videos/pajaros.mp4',
-                  thumbnail: '/images/thumbnail1.jpg',
+                  url: 'https://images-inmo.s3.us-east-2.amazonaws.com/videos/pajaros.mp4',
+                  thumbnail: '/fotosInmo.jpg',
                 },
                 {
                   id: '2',
                   title: 'Lo simplemente hermoso de nuestro país',
-                  url: '/videos/barcofaro.mp4',
-                  thumbnail: '/images/thumbnail1.jpg',
+                  url: 'https://images-inmo.s3.us-east-2.amazonaws.com/videos/barcofaro.mp4',
+                  thumbnail: '/fotosInmo.jpg',
                 },
                 {
                   id: '3',
                   title: 'Conoce nuestros deportes',
-                  url: '/videos/surf.mp4',
-                  thumbnail: '/images/thumbnail1.jpg',
+                  url: 'https://images-inmo.s3.us-east-2.amazonaws.com/videos/surf.mp4',
+                  thumbnail: '/fotosInmo.jpg',
                 },
                 {
                   id: '4',
                   title: 'Ven a conocer nuestra fauna',
-                  url: '/videos/volando.mp4',
-                  thumbnail: '/images/thumbnail1.jpg',
+                  url: 'https://images-inmo.s3.us-east-2.amazonaws.com/videos/volando.mp4',
+                  thumbnail: '/fotosInmo.jpg',
                 },
               ]}
             />

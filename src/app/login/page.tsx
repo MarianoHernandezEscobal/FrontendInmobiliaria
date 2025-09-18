@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEnvelope } from "react-icons/fa";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

@@ -204,17 +204,18 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             {formattedPrice}
           </div>
 
-          <div className="mb-3 flex gap-1 pb-1 scroll-smooth snap-x">
-            {features.map((feature, index) => (
-              <div key={index} className="snap-start shrink-0">
+          <div className="mb-3">
+            <div className="flex flex-wrap gap-1">
+              {features.map((feature, index) => (
                 <Badge
+                  key={index}
                   variant="outline"
-                  className="bg-primary/5 whitespace-nowrap"
+                  className="bg-primary/5 whitespace-nowrap text-xs"
                 >
                   {feature}
                 </Badge>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </CardContent>
 

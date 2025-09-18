@@ -98,6 +98,7 @@ export default function FooterModern() {
               </li>
             </ul>
           </div>
+          {/* 
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
@@ -116,6 +117,7 @@ export default function FooterModern() {
               </button>
             </div>
           </div>
+          */}
         </div>
 
         {/* Bottom Bar */}

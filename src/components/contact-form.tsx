@@ -67,7 +67,7 @@ export default function ContactForm({ propertyId, propertyTitle }: ContactFormPr
         />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full bg-nav" disabled={isSubmitting}>
         {isSubmitting ? "Enviando..." : "Enviar consulta"}
       </Button>
 
