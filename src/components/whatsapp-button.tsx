@@ -2,12 +2,16 @@
 "use client";
 
 import { FaWhatsapp } from "react-icons/fa";
-
+import { usePathname  } from "next/navigation";
+import { URL_INMO } from "@/constants/constants";
 const WhatsappButton = () => {
+
+  const pathname = usePathname()
+
   return (
     <a
       href={`https://api.whatsapp.com/send?phone=+59898384860&text=${encodeURIComponent(
-        "Hola, estoy interesado en sus propiedades."
+        `Hola, estoy interesado en tu propiedad: ${URL_INMO}${pathname}`
       )}&app_absent=1`}
       target="_blank"
       rel="noopener noreferrer"

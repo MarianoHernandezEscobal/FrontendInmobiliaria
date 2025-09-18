@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 
 export default function HomeVideo() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const videos = [
     'https://images-inmo.s3.us-east-2.amazonaws.com/faro.mp4',
@@ -12,16 +13,16 @@ export default function HomeVideo() {
     'https://images-inmo.s3.us-east-2.amazonaws.com/barco.mp4',
   ];
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const videoRefs = useRef<HTMLVideoElement[]>([]);
 
-    video.preload = 'auto';
+  useEffect(() => {
+    const currentVideo = videoRefs.current[currentIndex];
+    if (!currentVideo) return;
 
     const safePlay = async () => {
       try {
-        video.currentTime = 0;
-        await video.play();
+        currentVideo.currentTime = 0;
+        await currentVideo.play();
       } catch (err) {
         console.warn('Error al reproducir:', err);
       }
@@ -30,25 +31,18 @@ export default function HomeVideo() {
     safePlay();
 
     const handleEnded = () => {
-      const nextIndex = (currentIndex + 1) % videos.length;
-      setCurrentIndex(nextIndex);
-
-      const nextSrc = videos[nextIndex];
-
-      const onLoad = () => {
-        video.removeEventListener('loadeddata', onLoad);
-        safePlay();
-      };
-
-      video.addEventListener('loadeddata', onLoad);
-      video.src = nextSrc;
-      video.load();
+      setIsTransitioning(true);
+      setTimeout(() => {
+        const nextIndex = (currentIndex + 1) % videos.length;
+        setCurrentIndex(nextIndex);
+        setIsTransitioning(false);
+      }, 500); // tiempo de transición
     };
 
-    video.addEventListener('ended', handleEnded);
+    currentVideo.addEventListener('ended', handleEnded);
 
     return () => {
-      video.removeEventListener('ended', handleEnded);
+      currentVideo.removeEventListener('ended', handleEnded);
     };
   }, [currentIndex]);
 
@@ -67,18 +61,26 @@ export default function HomeVideo() {
         style={{
           backgroundImage: "url('/fotosInmo.jpg?height=1080&width=1920')",
         }}
-      ></div>
-
-      {/* Video */}
-      <video
-        ref={videoRef}
-        className="absolute w-full h-full object-cover z-0"
-        muted
-        playsInline
-        loop={false}
-        preload="auto"
-        src={videos[currentIndex]}
       />
+
+      {/* Videos precargados */}
+      {videos.map((src, index) => (
+        <video
+          key={index}
+          ref={(el) => {
+            if (el) videoRefs.current[index] = el;
+          }}
+          className={clsx(
+            'absolute w-full h-full object-cover transition-opacity duration-500',
+            index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+          )}
+          muted
+          playsInline
+          loop={false}
+          preload="auto"
+          src={src}
+        />
+      ))}
 
       {/* Flecha */}
       <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 z-20">

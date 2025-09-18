@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description:
     "Inmobiliaria Costa Azul ofrece venta y alquiler de casas, terrenos, apartamentos y campos en La Paloma, Rocha y otros balnearios de la costa uruguaya.",
   keywords: [
+    "inmobiliaria",
+    "costa azul",
+    "inmobiliaria costa azul",
     "casas en Anaconda",
     "alquiler en Anaconda",
     "venta en Anaconda",
