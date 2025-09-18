@@ -1,1 +1,1 @@
-export const BASE_URL = "https://backendinmobiliaria-1.onrender.com";
+export const BASE_URL = "https://localhost:3001";
