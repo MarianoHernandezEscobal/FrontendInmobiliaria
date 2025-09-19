@@ -281,8 +281,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logoColorFondo.png",
-    shortcut: "/logoColorFondo.png",
-    apple: "/logoColorFondo.png",
   },
   robots: {
     index: true,
