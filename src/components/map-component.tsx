@@ -189,7 +189,7 @@ export default function MapComponent({ properties, height, center, zoom }: MapCo
                 onClick={() => {
                   router.push(`/propiedades/${property.id}`);
                 }}
-                className="w-full mt-4 bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                className="w-full mt-4 bg-nav hover:bg-primary/90 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path

@@ -438,9 +438,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   </div>
                   <div className="h-[400px] w-full overflow-hidden rounded-lg">
                     <PropertyMap
-                      lat={property.geoCoordinates.lat}
-                      lng={property.geoCoordinates.lng}
-                      address={property.address}
+                      property={property}
                     />
                   </div>
                 </CardContent>
