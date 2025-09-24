@@ -80,3 +80,13 @@ export const registerUser = async (
   );
   return res.data;
 }
+
+export const forgotPassword = async (email: string) => {
+  const res = await axios.post(`${BASE_URL}/user/forgot-password`, { email });
+  return res.data;
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<AuthenticationResponseDto> => {
+  const res = await axios.post(`${BASE_URL}/user/reset-password`, { token, newPassword });
+  return res.data
+};

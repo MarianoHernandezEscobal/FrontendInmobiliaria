@@ -15,6 +15,7 @@ interface UserContextProps {
   fetchUserProfile: () => Promise<void>;
   updateUserProfile: (formData: UserUpdateRequestDto) => Promise<void>;
   registerUser: (user: RegisterUser) => void;
+  handleUserData: (user: User, token: string) => Promise<void>;
 
 }
 
@@ -61,6 +62,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleUserData = async (user: User, token: string) => {
+    try {
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
+      setHasSession(true);
+      setToken(token);
+      setUser(user);
+    } catch (error) {
+      console.error("Error during login:", error);
+      setHasSession(false);
+      setUser(null);
+      setToken(null);
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      throw error;
+    }
+  };
+
   const handlerRegister = async (user: RegisterUser) => {
     try {
       const response = await registerUser(user);
@@ -82,7 +101,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchUserProfile = async () => {
     try {
-      const userData = token ? await getUsers(token): null;
+      const userData = token ? await getUsers(token) : null;
       setUser(userData);
       sessionStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
@@ -102,7 +121,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateUserProfile = async (formData: UserUpdateRequestDto) => {
     try {
-      const updatedUser = token ? await updateUser(formData, token): null;
+      const updatedUser = token ? await updateUser(formData, token) : null;
       setUser(updatedUser?.user ?? null);
       setToken(updatedUser?.token ?? null);
       sessionStorage.setItem("user", JSON.stringify(updatedUser?.user));
@@ -126,7 +145,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         logoutUser: handleLogout,
         fetchUserProfile,
         updateUserProfile,
-        registerUser: handlerRegister
+        registerUser: handlerRegister,
+        handleUserData
       }}
     >
       {children}

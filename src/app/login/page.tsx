@@ -31,7 +31,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 bg-white rounded shadow-md">
         <h1 className="mb-6 text-2xl font-bold text-center">Iniciar Sesión</h1>
         {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
@@ -44,7 +44,7 @@ export default function LoginPage() {
               Correo Electrónico
             </label>
             <div className="relative">
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
                 <FaEnvelope className="h-5 w-5" />
               </div>
               <input
@@ -89,7 +89,7 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 text-white bg-nav rounded-md hover:bg-accent focus:outline-none focus:ring focus:ring-blue-300"
           >
             Iniciar Sesión
           </button>

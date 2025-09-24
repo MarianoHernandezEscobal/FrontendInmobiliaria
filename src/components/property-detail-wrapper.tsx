@@ -18,16 +18,16 @@ export default function PropertyDetailWrapper() {
   useEffect(() => {
     const loadProperty = async () => {
       let found = allProperties.find((p) => p.id === id) || null
-  
+
       if (!found) {
         if (allProperties.length === 0) {
           await reloadProperties()
           found = allProperties.find((p) => p.id === id) || null
         }
-  
+
         if (!found) {
           try {
-            found = await GetPropertyById(id) // ← CORREGIDO: sin `const`
+            found = await GetPropertyById(id)
             if (!found) {
               notFound()
               return
@@ -39,14 +39,14 @@ export default function PropertyDetailWrapper() {
           }
         }
       }
-  
+
       setProperty(found)
       setIsLoading(false)
     }
-  
+
     loadProperty()
   }, [id])
-  
+
   if (isLoading || !property) {
     return (
       <div className="flex w-full items-center justify-center text-muted-foreground">

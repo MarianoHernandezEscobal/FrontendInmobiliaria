@@ -15,7 +15,16 @@ import {
   Maximize2,
   WavesLadder,
   Ruler,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +38,11 @@ import PropertyMap from "@/components/property-map";
 import ContactForm from "@/components/contact-form";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
 import { NeighborhoodLabels } from "@/utils/neighborhoods-labels";
+import { useUser } from "@/context/user-context";
+import { useRouter } from "next/navigation";
+import { deleteProperty, GetHomeProperties } from "@/service/properties";
+import { useProperties } from "@/context/property-context";
+import { toast } from "sonner";
 
 interface PropertyDetailProps {
   property: Property;
@@ -40,6 +54,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [features, setFeatures] = useState<
     { title: string; values: [{ title: string; value: string }] }[]
   >([]);
+  const { user, token } = useUser();
+  const router = useRouter();
+  const { reloadProperties } = useProperties();
 
   const formattedPrice = formatPrice(property.price, property.status);
 
@@ -69,6 +86,33 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const selectImage = (index: number) => {
     setCurrentImageIndex(index);
   };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/propiedades/actualizar/${property.id}`)
+  }
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!token) {
+      router.push('/');
+      return;
+    }
+
+    try {
+      await deleteProperty(property.id, token);
+      localStorage.removeItem('AllProperties')
+      localStorage.removeItem('Home')
+      reloadProperties()
+      router.push('/ventas');
+    } catch (error) {
+      console.error('Error al eliminar propiedad:', error);
+      toast.error('Error al eliminar propiedad');
+    }
+  }
 
   const getPropertyTypeLabel = (type: PropertyTypes) => {
     const types = {
@@ -148,9 +192,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <button
                   key={index}
                   onClick={() => selectImage(index)}
-                  className={`h-2 w-2 rounded-full ${
-                    index === currentImageIndex ? "bg-white" : "bg-white/50"
-                  }`}
+                  className={`h-2 w-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-white/50"
+                    }`}
                   aria-label={`Ver imagen ${index + 1}`}
                 />
               ))}
@@ -168,13 +211,42 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               >
                 {getStatusLabel(property.status)}
               </Badge>
-              
+
               {property.pinned && (
                 <Badge variant="destructive" className="text-sm">
                   Destacado
                 </Badge>
               )}
             </div>
+
+            {user && user.admin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className={
+                      `absolute right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-md hover:bg-gray-100 z-20 ${property.pinned ? "top-10" : "top-2"}`
+                    }
+                    aria-label="Opciones de propiedad"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem onClick={handleEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    <span>Editar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -212,11 +284,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   <button
                     key={index}
                     onClick={() => selectImage(index)}
-                    className={`h-16 w-24 overflow-hidden rounded-md border ${
-                      index === currentImageIndex
-                        ? "border-primary"
-                        : "border-transparent"
-                    }`}
+                    className={`h-16 w-24 overflow-hidden rounded-md border ${index === currentImageIndex
+                      ? "border-primary"
+                      : "border-transparent"
+                      }`}
                   >
                     <img
                       src={src}
@@ -244,11 +315,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <CarouselItem key={index} className="basis-1/5">
                   <button
                     onClick={() => selectImage(index)}
-                    className={`h-20 w-full overflow-hidden rounded-md ${
-                      index === currentImageIndex
-                        ? "ring-2 ring-primary ring-offset-2"
-                        : ""
-                    }`}
+                    className={`h-20 w-full overflow-hidden rounded-md ${index === currentImageIndex
+                      ? "ring-2 ring-primary ring-offset-2"
+                      : ""
+                      }`}
                   >
                     <img
                       src={src || "/placeholder.svg"}
@@ -348,59 +418,59 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             </TabsContent>
 
             <TabsContent value="features" className="mt-6">
-            <CardHeader className="mb-4">
-                  <CardTitle>Características y comodidades</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div className="flex items-center gap-2">
-                      <Building className="h-5 w-5 text-primary" />
-                      <span>Tipo: {getPropertyTypeLabel(property.type)}</span>
-                    </div>
-
-                    {typeof property.yearBuilt === "number" &&
-                      property.yearBuilt > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5 text-primary" />
-                          <span>Año de construcción: {property.yearBuilt}</span>
-                        </div>
-                      )}
-
-                    {property.garage && (
-                      <div className="flex items-center gap-2">
-                        <Car className="h-5 w-5 text-primary" />
-                        <span>Garage</span>
-                      </div>
-                    )}
-
-                    {property.pool && (
-                      <div className="flex items-center gap-2">
-                        <WavesLadder className="h-5 w-5 text-primary" />
-                        <span>Piscina</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2">
-                      <Home className="h-5 w-5 text-primary" />
-                      <span>Estado: {getStatusLabel(property.status)}</span>
-                    </div>
-
-                    {typeof property.area === "number" && property.area > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Maximize2 className="h-5 w-5 text-primary" />
-                        <span>Área construida: {property.area} m²</span>
-                      </div>
-                    )}
-
-                    {typeof property.lotSize === "number" &&
-                      property.lotSize > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Ruler className="h-5 w-5 text-primary" />
-                          <span>Tamaño del terreno: {property.lotSize} m²</span>
-                        </div>
-                      )}
+              <CardHeader className="mb-4">
+                <CardTitle>Características y comodidades</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-5 w-5 text-primary" />
+                    <span>Tipo: {getPropertyTypeLabel(property.type)}</span>
                   </div>
-                </CardContent>
+
+                  {typeof property.yearBuilt === "number" &&
+                    property.yearBuilt > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-primary" />
+                        <span>Año de construcción: {property.yearBuilt}</span>
+                      </div>
+                    )}
+
+                  {property.garage && (
+                    <div className="flex items-center gap-2">
+                      <Car className="h-5 w-5 text-primary" />
+                      <span>Garage</span>
+                    </div>
+                  )}
+
+                  {property.pool && (
+                    <div className="flex items-center gap-2">
+                      <WavesLadder className="h-5 w-5 text-primary" />
+                      <span>Piscina</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <Home className="h-5 w-5 text-primary" />
+                    <span>Estado: {getStatusLabel(property.status)}</span>
+                  </div>
+
+                  {typeof property.area === "number" && property.area > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Maximize2 className="h-5 w-5 text-primary" />
+                      <span>Área construida: {property.area} m²</span>
+                    </div>
+                  )}
+
+                  {typeof property.lotSize === "number" &&
+                    property.lotSize > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Ruler className="h-5 w-5 text-primary" />
+                        <span>Tamaño del terreno: {property.lotSize} m²</span>
+                      </div>
+                    )}
+                </div>
+              </CardContent>
               <Card className="border-none shadow-none mt-6">
                 {property.features &&
                   property.features.length > 0 &&
