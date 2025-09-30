@@ -59,10 +59,12 @@ export async function GetHomeProperties(): Promise<Home> {
     }
 }
 
-export const createProperty = async (propertyData: Omit<Property, 'id'>, files: File[], token: string) => {
+export const createProperty = async (propertyData: Omit<Property, 'id'>,facebook:boolean ,files: File[], token: string) => {
     const formData = new FormData();
 
     formData.append("property", JSON.stringify(propertyData));
+    formData.append("facebook", JSON.stringify(facebook));
+
 
     files.forEach((file) => formData.append("files", file));
 
