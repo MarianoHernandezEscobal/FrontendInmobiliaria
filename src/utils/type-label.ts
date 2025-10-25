@@ -6,5 +6,7 @@ export const PropertyTypeLabels: Record<PropertyTypes, string> = {
     [PropertyTypes.LAND]: 'Terreno',
     [PropertyTypes.OFFICE]: 'Oficina',
     [PropertyTypes.STORE]: 'Local comercial',
+    [PropertyTypes.FARM]: 'Campo',
+    [PropertyTypes.CHAKRAS]: 'Chacra',
     [PropertyTypes.OTHER]: 'Otro',
   };

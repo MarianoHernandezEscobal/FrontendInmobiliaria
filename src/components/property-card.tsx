@@ -37,8 +37,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const features = extractFeatures(property);
   const formattedPrice = formatPrice(property.price, property.status);
   const { user, token } = useUser();
-  const { allProperties, setAllProperties } = useProperties();
   const router = useRouter();
+  const { reloadProperties } = useProperties();
 
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,17 +77,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   
     try {
       await deleteProperty(property.id, token);
-  
-      const updatedProperties = allProperties.filter(p => p.id !== property.id);
-      
-      setAllProperties(updatedProperties);
-  
-      // 🔥 Actualizar el localStorage
-      localStorage.setItem('AllProperties', JSON.stringify(updatedProperties));
-  
-      console.log("Propiedad eliminada:", property.id);
-  
-      router.push('/ventas');
+      localStorage.removeItem('AllProperties')
+      localStorage.removeItem('Home')
+      reloadProperties()
     } catch (error) {
       console.error('Error al eliminar propiedad:', error);
       toast.error('Error al eliminar propiedad');

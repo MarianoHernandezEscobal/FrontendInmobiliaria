@@ -31,7 +31,7 @@ interface PropertyFormValues {
   title: string
   shortDescription: string
   longDescription: string
-  type: PropertyTypes
+  type: PropertyTypes | string
   status: PropertyStatus[]
   price: number
   contribution?: number
@@ -78,6 +78,7 @@ export default function CreatePropertyForm() {
     images: false,
     review: false,
   })
+  const [showCustomType, setShowCustomType] = useState(false)
 
   const defaultValues: Partial<PropertyFormValues> = {
     title: "",
@@ -347,57 +348,100 @@ export default function CreatePropertyForm() {
                     />
                   </div>
 
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="type"
-                      rules={{
-                        required: "El tipo de propiedad es obligatorio",
+          <div className="grid gap-6 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="type"
+              rules={{
+                required: "El tipo de propiedad es obligatorio",
+                validate: (value) => {
+                  if (showCustomType && (!value || value.trim() === "")) {
+                    return "Debe especificar el tipo de propiedad"
+                  }
+                  return true
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Propiedad</FormLabel>
+                  {!showCustomType ? (
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === PropertyTypes.OTHER) {
+                          setShowCustomType(true)
+                          field.onChange("")
+                        } else {
+                          field.onChange(value)
+                        }
                       }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Propiedad</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Seleccione un tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.values(PropertyTypes).map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {PropertyTypeLabels[type]}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>Tipo de propiedad que está registrando.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="contribution"
-                      rules={{
-                        required: "La contribución es obligatorio",
-                        min: {
-                          value: 1,
-                          message: "La contribución debe ser mayor a 0",
-                        },
-                      }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contribución</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="Ej: 500" {...field} />
-                          </FormControl>
-                          <FormDescription>Contribución mensual de la propiedad.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccione un tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(PropertyTypes).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {PropertyTypeLabels[type]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="space-y-2">
+                      <FormControl>
+                        <Input
+                          placeholder="Especifique el tipo de propiedad"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowCustomType(false)
+                          field.onChange(PropertyTypes.HOUSE)
+                        }}
+                      >
+                        Volver a opciones predefinidas
+                      </Button>
+                    </div>
+                  )}
+                  <FormDescription>
+                    {showCustomType
+                      ? "Escriba el tipo de propiedad personalizado."
+                      : "Tipo de propiedad que está registrando. Seleccione 'Otro' para especificar un tipo personalizado."}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contribution"
+              rules={{
+                required: "La contribución es obligatorio",
+                min: {
+                  value: 1,
+                  message: "La contribución debe ser mayor a 0",
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contribución</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ej: 500" {...field} />
+                  </FormControl>
+                  <FormDescription>Contribución mensual de la propiedad.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
                   <FormField
                     control={form.control}
                     name="status"

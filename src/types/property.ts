@@ -13,6 +13,8 @@ export enum PropertyTypes {
   LAND = 'land',
   OFFICE = 'office',
   STORE = 'store',
+  FARM = 'farm',
+  CHAKRAS = 'chakras',
   OTHER = 'other',
 }
 
@@ -44,7 +46,7 @@ export interface Property {
   title: string
   shortDescription: string
   price: number
-  type: PropertyTypes
+  type: PropertyTypes | string
   status: PropertyStatus[]
   lotSize: number
   area?: number

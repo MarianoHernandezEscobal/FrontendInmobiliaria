@@ -1,6 +1,8 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import type React from "react"
+
+import { useEffect, useState } from "react"
 import {
   Bath,
   Bed,
@@ -13,79 +15,69 @@ import {
   Home,
   MapPin,
   Maximize2,
-  WavesLadder,
+  CakeSlice as WavesLadder,
   Ruler,
   MoreHorizontal,
   Pencil,
   Trash2,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  type Property,
-  PropertyStatus,
-  type PropertyTypes,
-} from "@/types/property";
-import { formatPrice } from "@/utils/property-utils";
-import PropertyMap from "@/components/property-map";
-import ContactForm from "@/components/contact-form";
-import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
-import { NeighborhoodLabels } from "@/utils/neighborhoods-labels";
-import { useUser } from "@/context/user-context";
-import { useRouter } from "next/navigation";
-import { deleteProperty, GetHomeProperties } from "@/service/properties";
-import { useProperties } from "@/context/property-context";
-import { toast } from "sonner";
+} from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { type Property, PropertyStatus, type PropertyTypes } from "@/types/property"
+import { formatPrice } from "@/utils/property-utils"
+import PropertyMap from "@/components/property-map"
+import ContactForm from "@/components/contact-form"
+import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel"
+import { NeighborhoodLabels } from "@/utils/neighborhoods-labels"
+import { useUser } from "@/context/user-context"
+import { useRouter } from "next/navigation"
+import { deleteProperty } from "@/service/properties"
+import { useProperties } from "@/context/property-context"
+import { toast } from "sonner"
+import { PropertyTypeLabels } from "@/utils/type-label"
 
 interface PropertyDetailProps {
-  property: Property;
+  property: Property
 }
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showAllImages, setShowAllImages] = useState(false);
-  const [features, setFeatures] = useState<
-    { title: string; values: [{ title: string; value: string }] }[]
-  >([]);
-  const { user, token } = useUser();
-  const router = useRouter();
-  const { reloadProperties } = useProperties();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showAllImages, setShowAllImages] = useState(false)
+  const [features, setFeatures] = useState<{ title: string; values: [{ title: string; value: string }] }[]>([])
+  const { user, token } = useUser()
+  const router = useRouter()
+  const { reloadProperties } = useProperties()
 
-  const formattedPrice = formatPrice(property.price, property.status);
+  const formattedPrice = formatPrice(property.price, property.status)
 
   useEffect(() => {
     if (property.features.length > 0) {
-      const parsedFeatures = JSON.parse(property.features);
-      setFeatures(parsedFeatures);
+      const parsedFeatures = JSON.parse(property.features)
+      setFeatures(parsedFeatures)
     }
-  }, []);
+  }, [])
 
   const nextImage = () => {
     if (currentImageIndex < property.imageSrc.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
+      setCurrentImageIndex(currentImageIndex + 1)
     } else {
-      setCurrentImageIndex(0);
+      setCurrentImageIndex(0)
     }
-  };
+  }
 
   const prevImage = () => {
     if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
+      setCurrentImageIndex(currentImageIndex - 1)
     } else {
-      setCurrentImageIndex(property.imageSrc.length - 1);
+      setCurrentImageIndex(property.imageSrc.length - 1)
     }
-  };
+  }
 
   const selectImage = (index: number) => {
-    setCurrentImageIndex(index);
-  };
+    setCurrentImageIndex(index)
+  }
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -94,48 +86,44 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
 
     if (!token) {
-      router.push('/');
-      return;
+      router.push("/")
+      return
     }
 
     try {
-      await deleteProperty(property.id, token);
-      localStorage.removeItem('AllProperties')
-      localStorage.removeItem('Home')
+      await deleteProperty(property.id, token)
+      localStorage.removeItem("AllProperties")
+      localStorage.removeItem("Home")
       reloadProperties()
-      router.push('/ventas');
+      router.push("/ventas")
     } catch (error) {
-      console.error('Error al eliminar propiedad:', error);
-      toast.error('Error al eliminar propiedad');
+      console.error("Error al eliminar propiedad:", error)
+      toast.error("Error al eliminar propiedad")
     }
   }
 
-  const getPropertyTypeLabel = (type: PropertyTypes) => {
-    const types = {
-      house: "Casa",
-      apartment: "Apartamento",
-      land: "Terreno",
-      office: "Oficina",
-      store: "Local Comercial",
-      other: "Otro",
-    };
-    return types[type] || "Propiedad";
-  };
+  const getPropertyTypeLabel = (type: string) => {
+    // Check if it's a predefined type first
+    if (PropertyTypeLabels[type as PropertyTypes]) {
+      return PropertyTypeLabels[type as PropertyTypes]
+    }
+    // Otherwise, return the custom type value with capitalization
+    return type.charAt(0).toUpperCase() + type.slice(1)
+  }
 
   const getStatusLabel = (status: PropertyStatus[]) => {
-    if (status.includes(PropertyStatus.ForRent)) return "En Alquiler";
-    if (status.includes(PropertyStatus.ForSale)) return "En Venta";
-    if (status.includes(PropertyStatus.Sold)) return "Vendido";
-    if (status.includes(PropertyStatus.Rented)) return "Alquilado";
-    if (status.includes(PropertyStatus.UnderConstruction))
-      return "En Construcción";
-    if (status.includes(PropertyStatus.Reserved)) return "Reservado";
-    return "Disponible";
-  };
+    if (status.includes(PropertyStatus.ForRent)) return "En Alquiler"
+    if (status.includes(PropertyStatus.ForSale)) return "En Venta"
+    if (status.includes(PropertyStatus.Sold)) return "Vendido"
+    if (status.includes(PropertyStatus.Rented)) return "Alquilado"
+    if (status.includes(PropertyStatus.UnderConstruction)) return "En Construcción"
+    if (status.includes(PropertyStatus.Reserved)) return "Reservado"
+    return "Disponible"
+  }
 
   return (
     <div className="container nav_padding mx-auto px-4 py-8">
@@ -192,8 +180,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <button
                   key={index}
                   onClick={() => selectImage(index)}
-                  className={`h-2 w-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-white/50"
-                    }`}
+                  className={`h-2 w-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-white/50"}`}
                   aria-label={`Ver imagen ${index + 1}`}
                 />
               ))}
@@ -202,11 +189,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             {/* Badges */}
             <div className="absolute left-4 top-4 flex flex-row gap-2">
               <Badge
-                variant={
-                  property.status.includes(PropertyStatus.ForRent)
-                    ? "secondary"
-                    : "default"
-                }
+                variant={property.status.includes(PropertyStatus.ForRent) ? "secondary" : "default"}
                 className="text-sm"
               >
                 {getStatusLabel(property.status)}
@@ -224,9 +207,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <DropdownMenuTrigger asChild>
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    className={
-                      `absolute right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-md hover:bg-gray-100 z-20 ${property.pinned ? "top-10" : "top-2"}`
-                    }
+                    className={`
+                      absolute right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-md hover:bg-gray-100 z-20 ${property.pinned ? "top-10" : "top-2"}`}
                     aria-label="Opciones de propiedad"
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -237,10 +219,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     <Pencil className="mr-2 h-4 w-4" />
                     <span>Editar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-red-600"
-                  >
+                  <DropdownMenuItem onClick={handleDelete} className="text-red-600">
                     <Trash2 className="mr-2 h-4 w-4" />
                     <span>Eliminar</span>
                   </DropdownMenuItem>
@@ -267,7 +246,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <ChevronLeft className="h-10 w-10" />
               </button>
               <img
-                src={property.imageSrc[currentImageIndex]}
+                src={property.imageSrc[currentImageIndex] || "/placeholder.svg"}
                 alt={`Imagen ampliada ${currentImageIndex + 1}`}
                 className="mx-auto max-h-[80vh] w-full object-contain rounded"
               />
@@ -284,13 +263,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   <button
                     key={index}
                     onClick={() => selectImage(index)}
-                    className={`h-16 w-24 overflow-hidden rounded-md border ${index === currentImageIndex
-                      ? "border-primary"
-                      : "border-transparent"
-                      }`}
+                    className={`h-16 w-24 overflow-hidden rounded-md border ${
+                      index === currentImageIndex ? "border-primary" : "border-transparent"
+                    }`}
                   >
                     <img
-                      src={src}
+                      src={src || "/placeholder.svg"}
                       alt={`Miniatura ${index + 1}`}
                       className="h-full w-full object-cover"
                     />
@@ -315,10 +293,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <CarouselItem key={index} className="basis-1/5">
                   <button
                     onClick={() => selectImage(index)}
-                    className={`h-20 w-full overflow-hidden rounded-md ${index === currentImageIndex
-                      ? "ring-2 ring-primary ring-offset-2"
-                      : ""
-                      }`}
+                    className={`h-20 w-full overflow-hidden rounded-md ${
+                      index === currentImageIndex ? "ring-2 ring-primary ring-offset-2" : ""
+                    }`}
                   >
                     <img
                       src={src || "/placeholder.svg"}
@@ -352,45 +329,37 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         <Bed className="h-5 w-5 text-primary" />
                       </div>
                       <span className="mt-1 text-sm font-medium">
-                        {property.rooms}{" "}
-                        {property.rooms === 1 ? "Dormitorio" : "Dormitorios"}
+                        {property.rooms} {property.rooms === 1 ? "Dormitorio" : "Dormitorios"}
                       </span>
                     </div>
                   )}
-                  {typeof property.bathrooms === "number" &&
-                    property.bathrooms > 0 && (
-                      <div className="flex flex-col items-center">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                          <Bath className="h-5 w-5 text-primary" />
-                        </div>
-                        <span className="mt-1 text-sm font-medium">
-                          {property.bathrooms}{" "}
-                          {property.bathrooms === 1 ? "Baño" : "Baños"}
-                        </span>
+                  {typeof property.bathrooms === "number" && property.bathrooms > 0 && (
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                        <Bath className="h-5 w-5 text-primary" />
                       </div>
-                    )}
+                      <span className="mt-1 text-sm font-medium">
+                        {property.bathrooms} {property.bathrooms === 1 ? "Baño" : "Baños"}
+                      </span>
+                    </div>
+                  )}
                   {typeof property.area === "number" && property.area > 0 && (
                     <div className="flex flex-col items-center">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                         <Maximize2 className="h-5 w-5 text-primary" />
                       </div>
-                      <span className="mt-1 text-sm font-medium">
-                        {property.area} m²
-                      </span>
+                      <span className="mt-1 text-sm font-medium">{property.area} m²</span>
                     </div>
                   )}
 
-                  {typeof property.lotSize === "number" &&
-                    property.lotSize > 0 && (
-                      <div className="flex flex-col items-center">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                          <Ruler className="h-5 w-5 text-primary" />
-                        </div>
-                        <span className="mt-1 text-sm font-medium">
-                          {property.lotSize} m² terreno
-                        </span>
+                  {typeof property.lotSize === "number" && property.lotSize > 0 && (
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                        <Ruler className="h-5 w-5 text-primary" />
                       </div>
-                    )}
+                      <span className="mt-1 text-sm font-medium">{property.lotSize} m² terreno</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -428,13 +397,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     <span>Tipo: {getPropertyTypeLabel(property.type)}</span>
                   </div>
 
-                  {typeof property.yearBuilt === "number" &&
-                    property.yearBuilt > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-primary" />
-                        <span>Año de construcción: {property.yearBuilt}</span>
-                      </div>
-                    )}
+                  {typeof property.yearBuilt === "number" && property.yearBuilt > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <span>Año de construcción: {property.yearBuilt}</span>
+                    </div>
+                  )}
 
                   {property.garage && (
                     <div className="flex items-center gap-2">
@@ -462,13 +430,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </div>
                   )}
 
-                  {typeof property.lotSize === "number" &&
-                    property.lotSize > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Ruler className="h-5 w-5 text-primary" />
-                        <span>Tamaño del terreno: {property.lotSize} m²</span>
-                      </div>
-                    )}
+                  {typeof property.lotSize === "number" && property.lotSize > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Ruler className="h-5 w-5 text-primary" />
+                      <span>Tamaño del terreno: {property.lotSize} m²</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <Card className="border-none shadow-none mt-6">
@@ -483,8 +450,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                           {feature.values.map((item, idx) => (
                             <div key={idx} className="flex items-center gap-2">
-                              <span className="font-bold">{item.title}:</span>{" "}
-                              {item.value}
+                              <span className="font-bold">{item.title}:</span> {item.value}
                             </div>
                           ))}
                         </div>
@@ -507,9 +473,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </p>
                   </div>
                   <div className="h-[400px] w-full overflow-hidden rounded-lg">
-                    <PropertyMap
-                      property={property}
-                    />
+                    <PropertyMap property={property} />
                   </div>
                 </CardContent>
               </Card>
@@ -525,14 +489,11 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <CardTitle>¿Te interesa esta propiedad?</CardTitle>
             </CardHeader>
             <CardContent>
-              <ContactForm
-                propertyId={property.id}
-                propertyTitle={property.title}
-              />
+              <ContactForm propertyId={property.id} propertyTitle={property.title} />
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  );
+  )
 }
