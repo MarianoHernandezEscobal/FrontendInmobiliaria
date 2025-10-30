@@ -193,7 +193,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </p>
 
           <div className="mb-3 text-xl font-bold text-primary">
-            {formattedPrice}
+            USD {formattedPrice}
           </div>
 
           <div className="mb-3">
