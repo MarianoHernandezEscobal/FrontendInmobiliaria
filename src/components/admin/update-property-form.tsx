@@ -45,7 +45,7 @@ interface PropertyFormValues {
   title: string;
   shortDescription: string;
   longDescription: string;
-  type: PropertyTypes;
+  type: PropertyTypes | string;
   status: PropertyStatus[];
   price: number;
   contribution?: number;
