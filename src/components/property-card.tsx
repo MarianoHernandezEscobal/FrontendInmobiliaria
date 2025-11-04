@@ -232,10 +232,16 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               </div>
             )}
 
-            {property.area && (
+            {property.type === "house" && property.area && (
               <div className="flex items-center text-sm">
                 <Maximize2 className="mr-1 h-4 w-4" />
                 <span>{property.area} m²</span>
+              </div>
+            )}
+            {property.lotSize && (
+              <div className="flex items-center text-sm">
+                <Maximize2 className="mr-1 h-4 w-4" />
+                <span>{property.lotSize} m²</span>
               </div>
             )}
           </div>

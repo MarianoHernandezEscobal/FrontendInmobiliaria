@@ -21,7 +21,7 @@ export default function FooterModern() {
       </div>
 
       <div className="container mx-auto px-4 pt-8 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div>
             <div className="mb-4">
               <h2 className="text-2xl font-bold">Inmobiliaria Costa Azul</h2>
@@ -58,8 +58,7 @@ export default function FooterModern() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
             <ul className="space-y-2 ">
-              <FooterLink href="/propiedades">Propiedades</FooterLink>
-              <FooterLink href="/terrenos">Terrenos</FooterLink>
+              <FooterLink href="/ventas">Ventas</FooterLink>
               <FooterLink href="/sobre-nosotros">Sobre Nosotros</FooterLink>
               <FooterLink href="/contacto">Contacto</FooterLink>
             </ul>

@@ -6,6 +6,23 @@ import { Card } from "@/components/ui/card"
 import { ImagePlus, Trash2, UploadCloud, X } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import { toast } from "sonner"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 interface ImageUploaderProps {
   value: string[]
@@ -13,10 +30,68 @@ interface ImageUploaderProps {
   maxFiles?: number
 }
 
+function SortableImageItem({
+  id,
+  src,
+  index,
+  total,
+  onRemove,
+}: {
+  id: string
+  src: string
+  index: number
+  total: number
+  onRemove: (index: number) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className="relative overflow-hidden cursor-grab active:cursor-grabbing"
+      {...attributes}
+      {...listeners}
+    >
+      <div className="group relative aspect-square">
+        <img
+          src={src || "/placeholder.svg"}
+          alt={`Imagen ${index + 1}`}
+          className="h-full w-full object-cover"
+          draggable={false}
+        />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:bg-black/50 group-hover:opacity-100">
+          <Button type="button" variant="destructive" size="icon" onClick={() => onRemove(index)} className="h-8 w-8">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        {index === 0 && (
+          <div className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">
+            Principal
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}
+
 export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [deleted, setDeleted] = useState<string[]>([])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -24,17 +99,16 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
         toast.warning("Límite de imágenes excedido")
         return
       }
-  
+
       setIsUploading(true)
-  
+
       try {
-        
-        const newPreviews = acceptedFiles.map(file => URL.createObjectURL(file))  // 🔥 crear URLS locales
+        const newPreviews = acceptedFiles.map((file) => URL.createObjectURL(file))
         const updatedFiles = [...files, ...acceptedFiles]
         const updatedPreviews = [...value, ...newPreviews]
-  
+
         setFiles(updatedFiles)
-        onChange(updatedPreviews, updatedFiles)   // 🔥 pasás previews + archivos
+        onChange(updatedPreviews, updatedFiles)
       } catch (error) {
         console.error("Error al subir imágenes:", error)
         toast.error("Error al subir imágenes")
@@ -54,45 +128,48 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
   })
 
   const removeImage = (index: number) => {
-    const newImages = [...value];
-    const removedImage = newImages.splice(index, 1)[0];
-  
-    const newFiles = [...files];
-    if (index < files.length) {
-      newFiles.splice(index, 1);
-    }
-  
-    if (removedImage && !removedImage.startsWith("blob:")) {
-      setDeleted(prev => [...prev, removedImage]);
-    }
-  
-    setFiles(newFiles);
-    onChange(newImages, newFiles, deleted.concat(removedImage.startsWith("blob:") ? [] : [removedImage]));
-  }
-  
-  
-
-  const reorderImages = (fromIndex: number, toIndex: number) => {
     const newImages = [...value]
-    const [movedImage] = newImages.splice(fromIndex, 1)
-    newImages.splice(toIndex, 0, movedImage)
+    const removedImage = newImages.splice(index, 1)[0]
 
     const newFiles = [...files]
-    const [movedFile] = newFiles.splice(fromIndex, 1)
-    newFiles.splice(toIndex, 0, movedFile)
+    if (index < files.length) {
+      newFiles.splice(index, 1)
+    }
+
+    if (removedImage && !removedImage.startsWith("blob:")) {
+      setDeleted((prev) => [...prev, removedImage])
+    }
 
     setFiles(newFiles)
-    onChange(newImages, newFiles)
+    onChange(newImages, newFiles, deleted.concat(removedImage.startsWith("blob:") ? [] : [removedImage]))
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      const oldIndex = value.findIndex((_, idx) => `image-${idx}` === active.id)
+      const newIndex = value.findIndex((_, idx) => `image-${idx}` === over.id)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newImages = arrayMove([...value], oldIndex, newIndex)
+        const newFiles = arrayMove([...files], oldIndex, newIndex)
+
+        setFiles(newFiles)
+        onChange(newImages, newFiles)
+      }
+    }
   }
 
   const removeAllImages = () => {
-    const deletedExisting = value.filter(img => !img.startsWith("blob:"));
-    
-    setFiles([]);
-    setDeleted(prev => [...prev, ...deletedExisting]);
-    
-    onChange([], [], deleted.concat(deletedExisting));
+    const deletedExisting = value.filter((img) => !img.startsWith("blob:"))
+
+    setFiles([])
+    setDeleted((prev) => [...prev, ...deletedExisting])
+
+    onChange([], [], deleted.concat(deletedExisting))
   }
+
   return (
     <div className="space-y-4">
       <div
@@ -135,70 +212,32 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {value.map((src, index) => (
-              <Card key={index} className="relative overflow-hidden">
-                <div className="group relative aspect-square">
-                  <img
-                    src={src || "/placeholder.svg"}
-                    alt={`Imagen ${index + 1}`}
-                    className="h-full w-full object-cover"
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              <SortableContext items={value.map((_, idx) => `image-${idx}`)} strategy={verticalListSortingStrategy}>
+                {value.map((src, index) => (
+                  <SortableImageItem
+                    key={`image-${index}`}
+                    id={`image-${index}`}
+                    src={src}
+                    index={index}
+                    total={value.length}
+                    onRemove={removeImage}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:bg-black/50 group-hover:opacity-100">
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => removeImage(index)}
-                      className="h-8 w-8"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {index === 0 && (
-                    <div className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">
-                      Principal
-                    </div>
-                  )}
+                ))}
+              </SortableContext>
+              {value.length < maxFiles && (
+                <div
+                  {...getRootProps()}
+                  className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary hover:bg-primary/5"
+                >
+                  <input {...getInputProps()} />
+                  <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                  <span className="mt-2 text-xs text-muted-foreground">Añadir más</span>
                 </div>
-                <div className="flex justify-between p-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => index > 0 && reorderImages(index, index - 1)}
-                    disabled={index === 0 || isUploading}
-                    className="h-8 w-8"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m12 19-7-7 7-7" />
-                      <path d="M19 12H5" />
-                    </svg>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => index < value.length - 1 && reorderImages(index, index + 1)}
-                    disabled={index === value.length - 1 || isUploading}
-                    className="h-8 w-8"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </Button>
-                </div>
-              </Card>
-            ))}
-            {value.length < maxFiles && (
-              <div {...getRootProps()} className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary hover:bg-primary/5">
-                <input {...getInputProps()} />
-                <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                <span className="mt-2 text-xs text-muted-foreground">Añadir más</span>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </DndContext>
         </div>
       )}
     </div>

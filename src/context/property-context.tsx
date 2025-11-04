@@ -13,6 +13,17 @@ type PropertyContextType = {
   setAllProperties: (properties: Property[]) => void
 }
 
+const CACHE_EXPIRATION_HOURS = 1
+const CACHE_KEYS = {
+  ALL: 'AllProperties',
+  HOME: 'Home',
+}
+
+type CachedData<T> = {
+  timestamp: number
+  data: T
+}
+
 const PropertyContext = createContext<PropertyContextType | undefined>(undefined)
 
 export function PropertyProvider({ children }: { children: ReactNode }) {
@@ -24,40 +35,57 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
   })
   const [loading, setLoading] = useState(true)
 
+  const isCacheValid = (timestamp: number) => {
+    const now = Date.now()
+    const diffHours = (now - timestamp) / (1000 * 60 * 60)
+    return diffHours < CACHE_EXPIRATION_HOURS
+  }
+
+  const getStoredData = <T,>(key: string): T | null => {
+    const stored = localStorage.getItem(key)
+    if (!stored) return null
+    try {
+      const parsed: CachedData<T> = JSON.parse(stored)
+      if (isCacheValid(parsed.timestamp)) return parsed.data
+      localStorage.removeItem(key)
+      return null
+    } catch {
+      localStorage.removeItem(key)
+      return null
+    }
+  }
+
+  const setStoredData = <T,>(key: string, data: T) => {
+    const cached: CachedData<T> = { timestamp: Date.now(), data }
+    localStorage.setItem(key, JSON.stringify(cached))
+  }
+
   const fetchProperties = async () => {
     try {
       setLoading(true)
 
-      const storedProperties = localStorage.getItem('AllProperties')
-      const storedHome = localStorage.getItem('Home')
+      const storedAll = getStoredData<Property[]>(CACHE_KEYS.ALL)
+      const storedHome = getStoredData<Home>(CACHE_KEYS.HOME)
 
-      if (storedProperties) {
-        setAllProperties(JSON.parse(storedProperties))
-      }
-      if (storedHome) {
-        setHomeProperties(JSON.parse(storedHome))
-      }
+      if (storedAll) setAllProperties(storedAll)
+      if (storedHome) setHomeProperties(storedHome)
 
-      if (!storedProperties) {
+      if (!storedAll) {
         const allRes = await GetAllProperties()
         setAllProperties(allRes)
-        localStorage.setItem('AllProperties', JSON.stringify(allRes))
+        setStoredData(CACHE_KEYS.ALL, allRes)
       }
 
       if (!storedHome) {
         const homeRes = await GetHomeProperties()
         setHomeProperties(homeRes)
-        localStorage.setItem('Home', JSON.stringify(homeRes))
+        setStoredData(CACHE_KEYS.HOME, homeRes)
       }
 
     } catch (error) {
       console.error('Error al obtener propiedades:', error)
       setAllProperties([])
-      setHomeProperties({
-        properties: [],
-        land: [],
-        pinned: [],
-      })
+      setHomeProperties({ properties: [], land: [], pinned: [] })
     } finally {
       setLoading(false)
     }
@@ -65,10 +93,21 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchProperties()
+
+    const interval = setInterval(fetchProperties, 120 * 60 * 1000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
-    <PropertyContext.Provider value={{ allProperties, homeProperties, loading, reloadProperties: fetchProperties, setAllProperties }}>
+    <PropertyContext.Provider
+      value={{
+        allProperties,
+        homeProperties,
+        loading,
+        reloadProperties: fetchProperties,
+        setAllProperties,
+      }}
+    >
       {children}
     </PropertyContext.Provider>
   )

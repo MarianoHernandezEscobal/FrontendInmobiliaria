@@ -438,26 +438,31 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   )}
                 </div>
               </CardContent>
-              <Card className="border-none shadow-none mt-6">
-                {property.features &&
-                  property.features.length > 0 &&
-                  features.map((feature, index) => (
-                    <div key={index} className="mb-4">
-                      <CardHeader className="mb-4">
-                        <CardTitle>{feature.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                          {feature.values.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <span className="font-bold">{item.title}:</span> {item.value}
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </div>
-                  ))}
-              </Card>
+<Card className="border-none shadow-none mt-6">
+  {property.features &&
+    property.features.length > 0 &&
+    features
+      .filter(feature => feature.values.some(item => item.value))
+      .map((feature, index) => (
+        <div key={index} className="mb-4">
+          <CardHeader className="mb-4">
+            <CardTitle>{feature.title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {feature.values
+                .filter(item => item.value)
+                .map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="font-bold">{item.title}:</span> {item.value}
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </div>
+      ))}
+</Card>
+
             </TabsContent>
 
             <TabsContent value="location" className="mt-6">
