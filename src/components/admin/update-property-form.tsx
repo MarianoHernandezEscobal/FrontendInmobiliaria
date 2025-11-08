@@ -328,7 +328,6 @@ export default function UpdatePropertyForm() {
   
       toast.success("Propiedad actualizada con éxito");
   
-      // 🔥 Actualizar el array reemplazando la propiedad por ID
       const updatedProperties = allProperties.map((prop) =>
         prop.id === updatedProperty.id ? updatedProperty : prop
       );

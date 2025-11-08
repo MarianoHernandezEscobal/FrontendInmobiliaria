@@ -70,7 +70,7 @@ export default function CreatePropertyForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const { token } = useUser()
-  const { allProperties } = useProperties()
+  const { reloadProperties } = useProperties()
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({
     basic: false,
     details: false,
@@ -224,9 +224,7 @@ export default function CreatePropertyForm() {
 
       const propertie = await createProperty(data, data.facebook, imageFiles, token)
       toast.success("Propiedad creada con éxito")
-
-      allProperties.push(propertie)
-      localStorage.setItem("AllProperties", JSON.stringify(allProperties))
+      await reloadProperties();
       router.push("/propiedades/" + propertie.id)
     } catch (error) {
       console.error("Error al crear la propiedad:", error)

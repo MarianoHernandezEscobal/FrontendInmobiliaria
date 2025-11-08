@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ImagePlus, Trash2, UploadCloud, X } from "lucide-react"
@@ -67,7 +67,14 @@ function SortableImageItem({
           draggable={false}
         />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:bg-black/50 group-hover:opacity-100">
-          <Button type="button" variant="destructive" size="icon" onClick={() => onRemove(index)} className="h-8 w-8">
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => onRemove(index)}
+            className="h-8 w-8"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -85,6 +92,11 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
   const [isUploading, setIsUploading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [deleted, setDeleted] = useState<string[]>([])
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleResetInput = () => {
+    if (inputRef.current) inputRef.current.value = ""
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -108,15 +120,16 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
         const updatedPreviews = [...value, ...newPreviews]
 
         setFiles(updatedFiles)
-        onChange(updatedPreviews, updatedFiles)
+        onChange(updatedPreviews, updatedFiles, deleted)
       } catch (error) {
         console.error("Error al subir imágenes:", error)
         toast.error("Error al subir imágenes")
       } finally {
         setIsUploading(false)
+        handleResetInput()
       }
     },
-    [value, files, onChange, maxFiles],
+    [value, files, onChange, maxFiles, deleted],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -128,6 +141,7 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
   })
 
   const removeImage = (index: number) => {
+    handleResetInput()
     const newImages = [...value]
     const removedImage = newImages.splice(index, 1)[0]
 
@@ -136,12 +150,14 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
       newFiles.splice(index, 1)
     }
 
+    const updatedDeleted = [...deleted]
     if (removedImage && !removedImage.startsWith("blob:")) {
-      setDeleted((prev) => [...prev, removedImage])
+      updatedDeleted.push(removedImage)
     }
 
     setFiles(newFiles)
-    onChange(newImages, newFiles, deleted.concat(removedImage.startsWith("blob:") ? [] : [removedImage]))
+    setDeleted(updatedDeleted)
+    onChange(newImages, newFiles, updatedDeleted)
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -154,20 +170,19 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
       if (oldIndex !== -1 && newIndex !== -1) {
         const newImages = arrayMove([...value], oldIndex, newIndex)
         const newFiles = arrayMove([...files], oldIndex, newIndex)
-
         setFiles(newFiles)
-        onChange(newImages, newFiles)
+        onChange(newImages, newFiles, deleted)
       }
     }
   }
 
   const removeAllImages = () => {
+    handleResetInput()
     const deletedExisting = value.filter((img) => !img.startsWith("blob:"))
-
+    const updatedDeleted = [...deleted, ...deletedExisting]
     setFiles([])
-    setDeleted((prev) => [...prev, ...deletedExisting])
-
-    onChange([], [], deleted.concat(deletedExisting))
+    setDeleted(updatedDeleted)
+    onChange([], [], updatedDeleted)
   }
 
   return (
