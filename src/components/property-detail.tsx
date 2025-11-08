@@ -142,7 +142,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       <div className="mb-8">
         <div className="relative overflow-hidden rounded-lg">
           {/* Imagen principal */}
-          <div className="relative h-[400px] md:h-[500px] w-full">
+          <div className="relative h-[500px] md:h-[600px] w-full">
             <img
               src={property.imageSrc[currentImageIndex] || "/placeholder.svg"}
               alt={`${property.title} - Imagen ${currentImageIndex + 1}`}
