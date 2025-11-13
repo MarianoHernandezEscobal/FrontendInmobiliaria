@@ -85,7 +85,7 @@ export default function UpdatePropertyForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const { token } = useUser();
-  const { allProperties } = useProperties();
+  const { allProperties, reloadProperties } = useProperties();
   const [isLoading, setIsLoading] = useState(true);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
@@ -97,6 +97,7 @@ export default function UpdatePropertyForm() {
       review: false,
     }
   );
+
 
   let defaultValues: Partial<PropertyFormValues> = {
     title: "",
@@ -328,13 +329,8 @@ export default function UpdatePropertyForm() {
   
       toast.success("Propiedad actualizada con éxito");
   
-      const updatedProperties = allProperties.map((prop) =>
-        prop.id === updatedProperty.id ? updatedProperty : prop
-      );
-  
-      localStorage.setItem("AllProperties", JSON.stringify(updatedProperties));
-  
-      router.push("/propiedades/" + updatedProperty.id);
+      await reloadProperties();
+      router.push("/propiedades/" + updatedProperty.id)
     } catch (error) {
       console.error("Error al actualizar la propiedad:", error);
       toast.error("Error al actualizar la propiedad");
@@ -1414,7 +1410,7 @@ export default function UpdatePropertyForm() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creando...
+                        Actualizando ...
                       </>
                     ) : (
                       "Actualizar Propiedad"

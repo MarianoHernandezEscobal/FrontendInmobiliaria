@@ -221,10 +221,10 @@ export function ImageUploader({ value = [], onChange, maxFiles = 10 }: ImageUplo
             <h3 className="text-sm font-medium">
               Imágenes subidas ({value.length}/{maxFiles})
             </h3>
-            <Button type="button" variant="outline" size="sm" onClick={removeAllImages} disabled={isUploading}>
+            {/* <Button type="button" variant="outline" size="sm" onClick={removeAllImages} disabled={isUploading}>
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar todas
-            </Button>
+            </Button> */}
           </div>
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
