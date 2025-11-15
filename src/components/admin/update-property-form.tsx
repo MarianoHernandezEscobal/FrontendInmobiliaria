@@ -27,7 +27,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ImageUploader } from "@/components/admin/image-uploader";
+import { ImageUpdate } from "@/components/admin/image-update";
 import { toast } from "sonner";
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { PropertyTypeLabels } from "@/utils/type-label";
@@ -38,6 +38,8 @@ import { NeighborhoodLabels } from "@/utils/neighborhoods-labels";
 import { useUser } from "@/context/user-context";
 import { useProperties } from "@/context/property-context";
 import { LocationPicker } from "./location-picker";
+import { buildImageList } from "@/utils/images-utils";
+import { ImageItem, ImageList } from "@/types/image";
 
 // Tipo para los valores del formulario
 interface PropertyFormValues {
@@ -69,7 +71,7 @@ interface PropertyFormValues {
   features: string;
 
   // Imágenes
-  imageSrc: string[];
+  imageSrc: ImageList;
 
   // Metadatos
   pinned: boolean;
@@ -83,11 +85,9 @@ export default function UpdatePropertyForm() {
   const id = Number(params?.id);
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const { token } = useUser();
   const { allProperties, reloadProperties } = useProperties();
   const [isLoading, setIsLoading] = useState(true);
-  const [deletedImages, setDeletedImages] = useState<string[]>([]);
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
     {
       basic: false,
@@ -157,12 +157,11 @@ export default function UpdatePropertyForm() {
         lng: property.geoCoordinates.lng,
       },
       features: property.features,
-      imageSrc: property.imageSrc,
+      imageSrc: buildImageList(property.imageSrc),
       pinned: property.pinned,
       approved: property.approved,
       createdAt: property.createdAt,
     });
-
     setIsLoading(false);
   }, [allProperties, id, router]);
 
@@ -249,11 +248,13 @@ export default function UpdatePropertyForm() {
         markStepCompleted("location", locationValid);
         return locationValid;
 
-      case "images":
-        const imagesValid =
-          formValues.imageSrc && formValues.imageSrc.length > 0;
-        markStepCompleted("images", imagesValid);
-        return imagesValid;
+case "images":
+  const imagesValid =
+    formValues.imageSrc &&
+    Object.keys(formValues.imageSrc || {}).length > 0;
+
+  markStepCompleted("images", imagesValid);
+  return imagesValid;
 
       default:
         return false;
@@ -322,8 +323,6 @@ export default function UpdatePropertyForm() {
   
       const updatedProperty = await updateProperty(
         { id, ...data },
-        deletedImages,
-        imageFiles,
         token
       );
   
@@ -332,10 +331,10 @@ export default function UpdatePropertyForm() {
       await reloadProperties();
       router.push("/propiedades/" + updatedProperty.id)
     } catch (error) {
-      console.error("Error al actualizar la propiedad:", error);
-      toast.error("Error al actualizar la propiedad");
+      console.error("Error al actualizar la propiedad:", error)
+      toast.error("Error al actualizar la propiedad")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   };
   
@@ -1185,25 +1184,23 @@ export default function UpdatePropertyForm() {
                     rules={{
                       required: "Debe subir al menos una imagen",
                       validate: (value) =>
-                        value.length > 0 || "Debe subir al menos una imagen",
+                        Object.keys(value || {}).length > 0 ||
+                        "Debe subir al menos una imagen",
                     }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Imágenes de la Propiedad</FormLabel>
+
                         <FormControl>
-                          <ImageUploader
-                            value={field.value}
-                            onChange={(previews, files, deleted) => {
-                              field.onChange(previews);
-                              setImageFiles(files || []);
-                              setDeletedImages(deleted || []);
-                            }}
-                            maxFiles={50}
-                          />
+<ImageUpdate
+  value={field.value}
+  onChange={(images) => field.onChange(images)}
+  maxFiles={50}
+/>
                         </FormControl>
+
                         <FormDescription>
-                          Suba imágenes de la propiedad. La primera imagen será
-                          la principal.
+                          Suba imágenes de la propiedad. La primera imagen será la principal.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -1330,19 +1327,18 @@ export default function UpdatePropertyForm() {
                     </div>
 
                     <Separator className="my-4" />
-
                     <div>
                       <h4 className="font-medium">Imágenes</h4>
                       <div className="mt-2">
                         {form.watch("imageSrc")?.length > 0 ? (
                           <div className="grid grid-cols-3 gap-2">
-                            {form.watch("imageSrc").map((src, index) => (
+                            {form.watch("imageSrc").map((img:ImageItem, index:number) => (
                               <div
                                 key={index}
                                 className="relative h-20 w-full overflow-hidden rounded-md"
                               >
                                 <img
-                                  src={src || "/placeholder.svg"}
+                                  src={img.url || "/placeholder.svg"}
                                   alt={`Imagen ${index + 1}`}
                                   className="h-full w-full object-cover"
                                 />
@@ -1356,7 +1352,6 @@ export default function UpdatePropertyForm() {
                         )}
                       </div>
                     </div>
-
                     <Separator className="my-4" />
 
                     <div>

@@ -1,3 +1,5 @@
+import { ImageList } from "./image"
+
 export enum PropertyStatus{
   ForSale = 'for_sale',
   ForRent = 'for_rent',
@@ -72,3 +74,34 @@ export interface Property {
   features: string
 }
 
+
+export interface UpdateProperty{
+  id: number
+  title: string
+  shortDescription: string
+  price: number
+  type: PropertyTypes | string
+  status: PropertyStatus[]
+  lotSize: number
+  area?: number
+  pool: boolean
+  rooms?: number
+  bathrooms?: number
+  address: string
+  geoCoordinates: {
+    lat: number
+    lng: number
+  }
+  neighborhood: Neighborhoods
+  yearBuilt?: number
+  imageSrc: ImageList
+  contribution?: number
+  longDescription: string
+  garage: boolean
+  pinned: boolean
+  approved: boolean
+  createdAt: string
+  createdBy?: any
+  rents?: any[]
+  features: string
+}

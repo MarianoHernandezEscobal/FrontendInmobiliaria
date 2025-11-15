@@ -1,7 +1,7 @@
 
 import { BASE_URL } from "@/constants/constants";
 import { Home } from "@/types/home";
-import { Property } from "@/types/property";
+import { Property, UpdateProperty } from "@/types/property";
 import axios from 'axios';
 
 export async function GetPropertyById(id: number): Promise<any> {
@@ -84,15 +84,13 @@ export const createProperty = async (propertyData: Omit<Property, 'id'>,facebook
 };
 
 export const updateProperty = async (
-    propertyData: Property,
-    deletedImages: string[],
-    newImages: File[],
+    propertyData: UpdateProperty,
     token: string
   ) => {
+        try {
+    console.log("propertyData"+propertyData)
     const formData = new FormData();
     formData.append("property", JSON.stringify(propertyData));
-    formData.append("deletedImages", JSON.stringify(deletedImages));
-    newImages.forEach((file) => formData.append("files", file));
     const res = await axios.put(`${BASE_URL}/properties/update`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -101,6 +99,10 @@ export const updateProperty = async (
     });
   
     return await res.data;
+        } catch (error) {
+        console.error('Error creating property:', error);
+        throw error;
+    }
   };
 
   export const deleteProperty = async (id: number, token:string): Promise<boolean> => {
