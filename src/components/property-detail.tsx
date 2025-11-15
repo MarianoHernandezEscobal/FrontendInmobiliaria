@@ -96,9 +96,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
 
     try {
       await deleteProperty(property.id, token)
-      localStorage.removeItem("AllProperties")
-      localStorage.removeItem("Home")
-      reloadProperties()
+      reloadProperties(true)
       router.push("/ventas")
     } catch (error) {
       console.error("Error al eliminar propiedad:", error)

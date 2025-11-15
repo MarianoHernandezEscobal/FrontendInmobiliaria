@@ -9,7 +9,7 @@ type PropertyContextType = {
   allProperties: Property[]
   homeProperties: Home
   loading: boolean
-  reloadProperties: () => Promise<void>
+  reloadProperties: (actualizar?: boolean) => Promise<void>
   setAllProperties: (properties: Property[]) => void
 }
 
@@ -60,10 +60,23 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(key, JSON.stringify(cached))
   }
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (actualizar: boolean = false) => {
     try {
       setLoading(true)
+      if (actualizar) {
+        const [allRes, homeRes] = await Promise.all([
+          GetAllProperties(),
+          GetHomeProperties(),
+        ]);
 
+        setAllProperties(allRes);
+        setHomeProperties(homeRes);
+
+        setStoredData(CACHE_KEYS.ALL, allRes);
+        setStoredData(CACHE_KEYS.HOME, homeRes);
+
+        return;
+      }
       const storedAll = getStoredData<Property[]>(CACHE_KEYS.ALL)
       const storedHome = getStoredData<Home>(CACHE_KEYS.HOME)
 

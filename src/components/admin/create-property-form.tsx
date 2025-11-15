@@ -224,7 +224,7 @@ export default function CreatePropertyForm() {
 
       const propertie = await createProperty(data, data.facebook, imageFiles, token)
       toast.success("Propiedad creada con éxito")
-      await reloadProperties();
+      await reloadProperties(true);
       router.push("/propiedades/" + propertie.id)
     } catch (error) {
       console.error("Error al crear la propiedad:", error)

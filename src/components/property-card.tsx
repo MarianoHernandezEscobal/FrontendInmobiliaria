@@ -77,9 +77,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   
     try {
       await deleteProperty(property.id, token);
-      localStorage.removeItem('AllProperties')
-      localStorage.removeItem('Home')
-      reloadProperties()
+      reloadProperties(true)
     } catch (error) {
       console.error('Error al eliminar propiedad:', error);
       toast.error('Error al eliminar propiedad');

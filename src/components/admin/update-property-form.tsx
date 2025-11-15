@@ -328,7 +328,7 @@ case "images":
   
       toast.success("Propiedad actualizada con éxito");
   
-      await reloadProperties();
+      await reloadProperties(true);
       router.push("/propiedades/" + updatedProperty.id)
     } catch (error) {
       console.error("Error al actualizar la propiedad:", error)
